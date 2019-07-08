@@ -1,0 +1,25 @@
+def dropcrafting item_a item_b:
+	as item_a at @s:
+		real_item = @s
+		as item_b#[distance=..1,limit=1,sort=nearest]:
+			give_minibomb
+			kill real_item
+			kill @s
+
+minibomb_item = @
+
+def give_minibomb:
+	minibomb_item = summon item ~ ~ ~ {Item:{id:"minecraft:tnt",Count:1b,tag:{Tags:[minibomb],HideFlags:1,display:{Name:'{"text":"MiniBomb"}',Lore:['{"text":"Throw to Activate"}']},Enchantments:[{id:"minecraft:unbreaking",lvl:1s}]}},Tags:[noExplodeMB]}
+
+def give_minibomb_stack:
+	give_minibomb
+	data modify entity minibomb_item#1 Item.Count set value 64
+
+def tick:
+	as @e[type=item,nbt={Item:{tag:{Tags:[minibomb]}},OnGround:1b},tag=!noExplodeMB] at @s:
+		a = 0
+		execute store result score a run data get entity @s Item.Count
+		creep = summon creeper ~ ~1 ~ {ignited:1,Fuse:-1}
+		execute store result entity creep#1 ExplosionRadius double 1 run scoreboard players get a
+		kill @s
+	dropcrafting @e[type=item,nbt={Item:{id:"minecraft:gunpowder",Count:1b}}] @e[type=item,nbt={Item:{id:"minecraft:redstone",Count:1b}}]
